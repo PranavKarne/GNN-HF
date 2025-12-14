@@ -298,6 +298,139 @@ npm run lint       # Run ESLint
 node server.js     # Start Express server
 ```
 
+## 🌐 Deployment Guide
+
+### Prerequisites
+- GitHub account with your code pushed
+- MongoDB Atlas cluster (free tier works)
+- Accounts on Vercel & Railway (both have free tiers)
+
+### 🚀 Deploy Frontend to Vercel
+
+1. **Go to [vercel.com](https://vercel.com)** and sign in with GitHub
+
+2. **Import Project**
+   - Click "Add New Project"
+   - Select `GNN-HF` repository
+   - **Root Directory**: `frontend`
+   - Framework Preset: Vite (auto-detected)
+
+3. **Configure Environment Variables**
+   - Add: `VITE_API_URL` = Your Railway backend URL (e.g., `https://your-app.railway.app`)
+
+4. **Deploy**
+   - Click "Deploy"
+   - Wait 2-3 minutes
+   - Your frontend is live! 🎉
+
+5. **Enable Auto-Deploy**
+   - ✅ Already enabled! Every push to `main` auto-deploys
+
+### 🔧 Deploy Backend to Railway
+
+1. **Go to [railway.app](https://railway.app)** and sign in with GitHub
+
+2. **Create New Project**
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select `GNN-HF` repository
+   - **Root Directory**: Leave as root (Railway auto-detects `backend/`)
+
+3. **Configure Environment Variables**
+   - Click "Variables" tab and add:
+   ```env
+   MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/dbname
+   JWT_SECRET=your_secret_key_here
+   PORT=5000
+   FRONTEND_URL=https://your-app.vercel.app
+   PYTHON_PATH=python3
+   ```
+
+4. **Configure Build Settings**
+   - **Build Command**: `cd backend && npm install`
+   - **Start Command**: `cd backend && node server.js`
+   - Railway auto-detects Python for ML models ✅
+
+5. **Deploy**
+   - Click "Deploy"
+   - Wait 3-5 minutes (Python dependencies take longer)
+   - Copy your Railway URL (e.g., `https://gnn-hf.railway.app`)
+
+6. **Update Frontend URL in Vercel**
+   - Go back to Vercel project settings
+   - Update `VITE_API_URL` to your Railway URL
+   - Redeploy frontend
+
+7. **Enable Auto-Deploy**
+   - ✅ Already enabled! Every push to `main` auto-deploys
+
+### 🔄 Auto-Deploy Workflow
+
+Once setup is complete:
+
+```bash
+# Make changes locally
+git add .
+git commit -m "Update feature"
+git push origin main
+
+# ✨ Magic happens:
+# 1. Railway auto-deploys backend (3-5 min)
+# 2. Vercel auto-deploys frontend (1-2 min)
+# 3. Your live app is updated!
+```
+
+### ✅ Verify Deployment
+
+Test these URLs in your browser:
+
+```
+Frontend: https://your-app.vercel.app
+Backend Health: https://your-app.railway.app/health
+Backend API: https://your-app.railway.app/api/auth/login
+```
+
+### 📋 Post-Deployment Checklist
+
+- ✅ MongoDB Atlas IP allowlist includes `0.0.0.0/0` (allow all IPs for serverless)
+- ✅ Frontend `VITE_API_URL` points to Railway backend
+- ✅ Backend `FRONTEND_URL` points to Vercel frontend
+- ✅ JWT_SECRET is a strong random key (generate: `openssl rand -base64 32`)
+- ✅ Both platforms show "Build Successful"
+- ✅ Health check returns 200 OK
+
+### 🆓 Free Tier Limits
+
+**Vercel**
+- 100GB bandwidth/month
+- Unlimited projects
+- Auto-scaling
+
+**Railway**
+- $5 free credits/month
+- ~500 hours of runtime
+- Auto-sleep after inactivity (wakes on request)
+
+### 🐛 Troubleshooting Deployment
+
+**Frontend build fails**
+```bash
+# Check node version (should be 18+)
+# Vercel auto-uses Node 20
+```
+
+**Backend crashes on Railway**
+```bash
+# Check Railway logs for Python errors
+# Ensure requirements.txt is present in backend/
+# Verify Python version (Railway uses 3.11+)
+```
+
+**CORS errors after deployment**
+```bash
+# Update FRONTEND_URL in Railway to match Vercel URL
+# Restart Railway service
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
