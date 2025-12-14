@@ -1,15 +1,44 @@
-# ECG Heart Prediction System
+# 🫀 GNN-HF: ECG Heart Failure Prediction System
 
-A full-stack deep learning application for ECG (electrocardiogram) analysis using CNN-GNN hybrid models with PyTorch.
+AI-powered heart failure detection using Graph Neural Networks and ECG image analysis.
+
+[![Tech Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20PyTorch-blue)](#-tech-stack)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](#)
+
+## ⚡ Quick Start
+
+```bash 
+# 1️⃣ Clone the repository
+git clone https://github.com/PranavKarne/GNN-HF.git
+cd GNN-HF
+
+# 2️⃣ Setup Backend
+cd backend
+npm install
+cp .env.example .env    # Edit this file with your MongoDB URI
+node server.js          # Starts on http://localhost:5000
+
+# 3️⃣ Setup Frontend (new terminal)
+cd frontend
+npm install
+npm run dev             # Starts on http://localhost:8080
+```
+
+That's it! Open http://localhost:8080 in your browser.
+
+---
 
 ## 🏗️ Project Structure
 
 ```
-heartprediction/
-├── frontend/          # React + TypeScript + Vite application
-├── backend/           # Express.js API server
-├── .venv/            # Python virtual environment (for ML models)
-└── PROJECT_STATUS.md  # Detailed project documentation
+GNN-HF/
+├── frontend/          # React + TypeScript + Vite
+├── backend/           # Express.js API + ML integration
+│   ├── ml/           # PyTorch models
+│   ├── routes/       # API endpoints
+│   ├── models/       # MongoDB schemas
+│   └── uploads/      # ECG image storage
+└── .venv/            # Python virtual environment (local only)
 ```
 
 ## 🚀 Tech Stack
@@ -35,129 +64,228 @@ heartprediction/
 - **Python**: 3.13.3
 - **Image Processing**: OpenCV (ECGtizer)
 
-## 📦 Installation
+## 📦 Detailed Installation
 
 ### Prerequisites
-- Node.js 20.x or higher
-- Python 3.13.x
-- MongoDB Atlas account (or local MongoDB)
+- **Node.js** 20.x or higher ([Download](https://nodejs.org))
+- **Python** 3.13.x ([Download](https://python.org))
+- **MongoDB Atlas** account ([Sign up free](https://mongodb.com/cloud/atlas))
 
-### 1. Clone the Repository
+### 1️⃣ Clone the Repository
 ```bash
-git clone <repository-url>
-cd heartprediction
+git clone https://github.com/PranavKarne/GNN-HF.git
+cd GNN-HF
 ```
 
-### 2. Setup Backend
+### 2️⃣ Setup Backend
+
 ```bash
 cd backend
 npm install
-
-# Create .env file with the following:
-# MONGODB_URI=<your-mongodb-connection-string>
-# JWT_SECRET=<your-secret-key>
-# PORT=5000
 ```
 
-### 3. Setup Python Environment
+**Create `.env` file** in `backend/` directory:
+```env
+MONGO_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/heartprediction
+JWT_SECRET=your_super_secret_key_change_this
+PORT=5000
+FRONTEND_URL=http://localhost:8080
+```
+
+> 💡 **Tip:** Use `.env.example` as a template
+
+### 3️⃣ Setup Python Environment (for ML models)
+
 ```bash
 # From project root
 python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Activate virtual environment
+source .venv/bin/activate  # macOS/Linux
+# OR
+.venv\Scripts\activate     # Windows
 
 # Install Python dependencies
 cd backend
 pip install -r requirements.txt
 ```
 
-### 4. Setup Frontend
+### 4️⃣ Setup Frontend
+
 ```bash
 cd frontend
 npm install
-# or
-bun install
 ```
 
-## 🎯 Running the Application
+**Create `.env` file** in `frontend/` directory:
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-### Start Backend Server
+## 🚀 Running the Application
+
+### Option 1: Run Separately (Recommended)
+
+**Terminal 1 - Backend:**
 ```bash
 cd backend
 node server.js
 ```
-Backend will run on: http://localhost:5000
+✅ Backend running at: http://localhost:5000
 
-### Start Frontend Development Server
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
 npm run dev
-# or
-bun run dev
 ```
-Frontend will run on: http://localhost:8080
+✅ Frontend running at: http://localhost:8080
+
+### Option 2: Quick Start Script
+
+```bash
+# Backend
+cd backend && node server.js &
+
+# Frontend  
+cd frontend && npm run dev
+```
+
+## 🧪 Test the Application
+
+1. Open http://localhost:8080
+2. Click "Sign Up" and create an account
+3. Login with your credentials
+4. Upload an ECG image on the Dashboard
+5. View AI prediction results!
 
 ## 🔑 Key Features
 
-- ✅ User Authentication (JWT-based)
-- ✅ ECG Image Upload & Analysis
-- ✅ Real-time ML Predictions
-- ✅ Patient Report Management
-- ✅ Dashboard with Statistics
-- ✅ Responsive UI/UX
-- ✅ Secure Password Hashing
-- ✅ Protected Routes
+- 🔐 **Secure Authentication** - JWT-based user login/signup
+- 🧠 **AI-Powered Analysis** - CNN-GNN hybrid model for ECG classification
+- 📊 **Real-time Predictions** - Instant heart failure risk assessment
+- 📁 **Report Management** - Save and view patient analysis history
+- 📈 **Dashboard Analytics** - Visual statistics and insights
+- 💅 **Modern UI/UX** - Responsive design with Shadcn UI + TailwindCSS
+- 🔒 **Data Security** - Encrypted passwords, protected routes
+
+## 🎨 Screenshots
+
+[Add screenshots of your application here]
 
 ## 📚 API Endpoints
 
-### Authentication
-- `POST /api/auth/signup` - User registration
+### 🔐 Authentication
+- `POST /api/auth/signup` - Register new user
 - `POST /api/auth/login` - User login
 
-### Predictions
-- `POST /api/predict` - Upload ECG and get prediction
+### 🧪 Predictions
+- `POST /api/predict` - Upload ECG image and get AI prediction (requires auth)
 
-### Reports
-- `GET /api/reports` - Get user's prediction history
-- `GET /api/dashboardStats` - Get dashboard statistics
+### 📊 Reports
+- `GET /api/reports/get-reports` - Get user's prediction history (requires auth)
+- `GET /api/reports/dashboardStats` - Dashboard statistics (requires auth)
+- `GET /api/reports/download-pdf/:id` - Download PDF report (requires auth)
+- `DELETE /api/reports/delete-report/:id` - Delete report (requires auth)
 
-### Static Files
-- `GET /uploads/:filename` - Access uploaded ECG images
+### 👤 Profile
+- `GET /api/profile` - Get user profile (requires auth)
+- `PUT /api/profile` - Update user profile (requires auth)
+- `POST /api/update-password` - Change password (requires auth)
 
-## 🗂️ Database Schema
+## 🗄️ Database Schema
 
 ### User Model
 ```javascript
 {
-  email: String (unique),
-  passwordHash: String,
-  createdAt: Date,
-  tokenExpiry: Date
+  email: String (unique, required),
+  passwordHash: String (required),
+  patientInfo: {
+    patientId: String (unique),
+    patientName: String,
+    age: Number,
+    gender: String,
+    contactNumber: String,
+    symptoms: String,
+    medicalHistory: String
+  },
+  createdAt: Date
 }
 ```
 
 ### Patient Report Model
 ```javascript
 {
-  userId: ObjectId,
+  userId: ObjectId (ref: User),
   patientId: String,
-  ecgImagePath: String,
-  predictions: Object,
-  createdAt: Date
+  name: String,
+  age: Number,
+  gender: String,
+  symptoms: String,
+  medicalHistory: String,
+  
+  predictedClass: String,
+  confidence: Number,
+  riskLevel: String (low/moderate/high),
+  riskScore: Number,
+  
+  imagePath: String,
+  imageBase64: String,
+  probabilities: Object,
+  
+  timestamp: Date
 }
 ```
 
 ## 🔒 Environment Variables
 
-### Backend (.env)
+### Backend (`.env`)
 ```env
-MONGODB_URI=mongodb+srv://...
-JWT_SECRET=your_secret_key
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname
+JWT_SECRET=your_random_secret_key_here
 PORT=5000
+FRONTEND_URL=http://localhost:8080
 ```
 
-## 🛠️ Development
+### Frontend (`.env`)
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-### Frontend Scripts
+## ⚠️ Common Issues & Solutions
+
+### Issue: "Module not found" errors
+```bash
+# Delete node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Issue: Python errors when predicting
+```bash
+# Make sure Python virtual environment is activated
+source .venv/bin/activate
+
+# Reinstall Python packages
+pip install -r backend/requirements.txt
+```
+
+### Issue: MongoDB connection failed
+- Check your MongoDB URI in `.env`
+- Ensure IP address is whitelisted in MongoDB Atlas
+- Verify username/password are correct
+
+### Issue: Port already in use
+```bash
+# Find and kill process using port 5000
+lsof -ti:5000 | xargs kill
+
+# Or use a different port in .env
+PORT=5001
+```
+
+## 🛠️ Development Scripts
+
+### Frontend
 ```bash
 npm run dev        # Start development server
 npm run build      # Build for production
@@ -165,18 +293,22 @@ npm run preview    # Preview production build
 npm run lint       # Run ESLint
 ```
 
-### Backend Scripts
+### Backend
 ```bash
-node server.js     # Start server
+node server.js     # Start Express server
 ```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
-[Add your license here]
+This project is licensed under the MIT License.
 
-## 👥 Contributors
+## 👥 Team
 
-[Add contributors]
+Developed by the GNN-HF Team
 
 ## 📞 Support
 
