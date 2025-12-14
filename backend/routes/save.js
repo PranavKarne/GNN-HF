@@ -1,39 +1,25 @@
 import express from "express";
 import PatientReport from "../models/PatientReport.js";
-import fs from "fs";
+import User from "../models/User.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // ===================================================================
 // ⭐ SAVE REPORT API (Now stores Base64 + ImagePath)
 // ===================================================================
-router.post("/save-report", async (req, res) => {
+router.post("/save-report", authMiddleware, async (req, res) => {
   try {
+    const email = req.user.email; // Get from authenticated user
     const {
-      email,
-      name,
-      age,
-      gender,
-      bloodPressure,
-      bloodSugar,
-      symptoms,
-      imagePath,          // /uploads/xxxx.png
+      imagePath,
       predictedClass,
       riskLevel,
       riskScore,
       confidence,
       probabilities,
+      patientData, // New: patient data from upload form
     } = req.body;
-
-    // ===================================================================
-    // ❗ Validate required fields
-    // ===================================================================
-    if (!email) {
-      return res.status(400).json({
-        status: "error",
-        message: "Email is required",
-      });
-    }
 
     if (!imagePath) {
       return res.status(400).json({
@@ -42,45 +28,54 @@ router.post("/save-report", async (req, res) => {
       });
     }
 
-    // ===================================================================
-    // ⭐ Read image and convert to Base64
-    // ===================================================================
-    let imageBase64 = "";
-    try {
-      const fullPath = process.cwd() + imagePath; // convert public URL → real path
-      const fileData = fs.readFileSync(fullPath);
-      imageBase64 = fileData.toString("base64");
-    } catch (err) {
-      console.error("⚠ Error reading image for Base64:", err);
+    if (!patientData) {
+      return res.status(400).json({
+        status: "error",
+        message: "Patient data is required",
+      });
     }
 
     // ===================================================================
-    // ⭐ AUTO-INCREMENT PATIENT ID PER USER
+    // ⭐ GET USER'S DATA FROM DATABASE
     // ===================================================================
-    const lastRecord = await PatientReport.findOne({ userEmail: email })
-      .sort({ patientId: -1 })
-      .lean();
+    const user = await User.findOne({ email }).lean();
+    
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
 
-    let nextPatientId = lastRecord ? lastRecord.patientId + 1 : 0;
+    if (!user.patientId) {
+      return res.status(400).json({
+        status: "error",
+        message: "User does not have a patient ID assigned",
+      });
+    }
+
+    // Extract patient info from the upload form data
+    const name = patientData.patientName || "Unknown";
+    const age = parseInt(patientData.age) || 0;
+    const gender = patientData.gender || "Not specified";
+    const symptoms = patientData.symptoms || "";
+    const medicalHistory = patientData.medicalHistory || "";
 
     // ===================================================================
     // ⭐ SAVE NEW REPORT
     // ===================================================================
     const report = await PatientReport.create({
       userEmail: email,
-
-      patientId: nextPatientId,
-
+      patientId: user.patientId, // Use user's unique patient ID
       name,
       age,
       gender,
-      bloodPressure,
-      bloodSugar,
       symptoms,
-
+      medicalHistory,
+      
       // ⭐ BOTH STORED
       imagePath,
-      imageBase64,
+      // imageBase64 intentionally omitted to avoid DB bloat
 
       predictedClass,
       riskLevel,
@@ -92,8 +87,7 @@ router.post("/save-report", async (req, res) => {
     return res.json({
       status: "success",
       message: "Report saved successfully",
-      patientId: nextPatientId,
-      patientIdDisplay: String(nextPatientId).padStart(4, "0"),
+      patientId: user.patientId,
       report,
     });
 

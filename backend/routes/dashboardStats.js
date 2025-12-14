@@ -1,5 +1,6 @@
 import express from "express";
 import PatientReport from "../models/PatientReport.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -15,16 +16,10 @@ const router = express.Router();
    - latestReport
    ========================================================================= */
 
-router.get("/dashboard-stats", async (req, res) => {
+router.get("/dashboard-stats", authMiddleware, async (req, res) => {
   try {
-    const { email } = req.query;
-
-    if (!email) {
-      return res.status(400).json({
-        status: "error",
-        message: "Email is required",
-      });
-    }
+    // Get email from authenticated user
+    const email = req.user.email;
 
     /* ================================
        📌 1. Get all reports
