@@ -1,0 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Medical Red Theme */
+    --background: 0 0% 99%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Primary - Medical Red */
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 0 72% 95%;
+    --primary-dark: 0 72% 40%;
+
+    /* Secondary - Soft Rose */
+    --secondary: 0 40% 96%;
+    --secondary-foreground: 0 50% 30%;
+
+    /* Muted */
+    --muted: 0 10% 96%;
+    --muted-foreground: 0 5% 45%;
+
+    /* Accent - Warm Coral */
+    --accent: 12 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Risk Colors */
+    --risk-high: 0 84% 60%;
+    --risk-moderate: 38 92% 50%;
+    --risk-low: 142 76% 36%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 10% 90%;
+    --input: 0 10% 90%;
+    --ring: 0 72% 51%;
+
+    --radius: 1rem;
+
+    /* Glass Effect */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-shadow: 0 72% 51% / 0.1;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(12 80% 55%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 40% 98%) 0%, hsl(0 30% 95%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(0 20% 98%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(0 50% 15%) 0%, hsl(0 40% 25%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.04);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 8px 30px hsl(0 0% 0% / 0.08);
+    --shadow-xl: 0 20px 50px hsl(0 0% 0% / 0.12);
+    --shadow-glow: 0 0 40px hsl(0 72% 51% / 0.15);
+    --shadow-card: 0 4px 20px hsl(0 72% 51% / 0.08);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 0 5% 25%;
+    --sidebar-primary: 0 72% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 40% 96%;
+    --sidebar-accent-foreground: 0 50% 30%;
+    --sidebar-border: 0 10% 92%;
+    --sidebar-ring: 0 72% 51%;
+  }
+
+  .dark {
+    --background: 0 20% 8%;
+    --foreground: 0 10% 95%;
+
+    --card: 0 15% 12%;
+    --card-foreground: 0 10% 95%;
+
+    --popover: 0 15% 12%;
+    --popover-foreground: 0 10% 95%;
+
+    --primary: 0 72% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 0 40% 20%;
+    --primary-dark: 0 72% 65%;
+
+    --secondary: 0 20% 18%;
+    --secondary-foreground: 0 10% 90%;
+
+    --muted: 0 15% 15%;
+    --muted-foreground: 0 10% 60%;
+
+    --accent: 12 70% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 15% 20%;
+    --input: 0 15% 20%;
+    --ring: 0 72% 55%;
+
+    --glass-bg: 0 15% 12% / 0.8;
+    --glass-border: 0 0% 100% / 0.1;
+    --glass-shadow: 0 72% 55% / 0.2;
+
+    --gradient-hero: linear-gradient(180deg, hsl(0 20% 8%) 0%, hsl(0 15% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 15% 14%) 0%, hsl(0 15% 10%) 100%);
+
+    --sidebar-background: 0 20% 10%;
+    --sidebar-foreground: 0 10% 90%;
+    --sidebar-primary: 0 72% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 20% 15%;
+    --sidebar-accent-foreground: 0 10% 90%;
+    --sidebar-border: 0 15% 18%;
+    --sidebar-ring: 0 72% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Glass Card Effect */
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-xl border border-border/50 rounded-2xl;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Medical Button Styles */
+  .btn-primary-glow {
+    @apply relative overflow-hidden;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .btn-primary-glow::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, transparent 50%);
+  }
+
+  .btn-primary-glow:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Risk Level Badges */
+  .risk-high {
+    @apply bg-[hsl(var(--risk-high)/0.1)] text-[hsl(var(--risk-high))] border-[hsl(var(--risk-high)/0.3)];
+  }
+
+  .risk-moderate {
+    @apply bg-[hsl(var(--risk-moderate)/0.1)] text-[hsl(var(--risk-moderate))] border-[hsl(var(--risk-moderate)/0.3)];
+  }
+
+  .risk-low {
+    @apply bg-[hsl(var(--risk-low)/0.1)] text-[hsl(var(--risk-low))] border-[hsl(var(--risk-low)/0.3)];
+  }
+
+  /* Section Styling */
+  .section-padding {
+    @apply py-20 lg:py-28;
+  }
+
+  .container-narrow {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-wide {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Heading Styles */
+  .heading-xl {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight;
+  }
+
+  .heading-lg {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight;
+  }
+
+  .heading-md {
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Feature Card */
+  .feature-card {
+    @apply glass-card p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  /* Stat Card */
+  .stat-card {
+    @apply glass-card p-6 text-center transition-all duration-300 hover:shadow-lg;
+  }
+
+  /* Form Input Focus */
+  .input-medical {
+    @apply border-2 border-border bg-background/50 rounded-xl px-4 py-3 transition-all duration-200;
+    @apply focus:border-primary focus:ring-4 focus:ring-primary/10 focus:outline-none;
+  }
+
+  /* Upload Zone */
+  .upload-zone {
+    @apply border-2 border-dashed border-border rounded-2xl p-8 text-center transition-all duration-300;
+    @apply hover:border-primary hover:bg-primary/5 cursor-pointer;
+  }
+
+  .upload-zone.active {
+    @apply border-primary bg-primary/10;
+  }
+}
+
+@layer utilities {
+  /* Animation Delays */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+}
