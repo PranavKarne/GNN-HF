@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BackToHome } from "@/components/BackToHome";
 import { API_ENDPOINTS } from "@/config/api";
 import { getAuthHeadersForFormData, getAuthHeaders } from "@/config/apiUtils";
@@ -20,9 +21,12 @@ import {
   Brain,
   Loader2,
   User,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
-type AnalysisState = "idle" | "analyzing" | "complete";
+type AnalysisState = "idle" | "analyzing" | "complete" | "error";
 
 interface AnalysisResult {
   riskLevel: string;
@@ -52,6 +56,7 @@ export default function UploadPage() {
   const [state, setState] = useState<AnalysisState>("idle");
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   
   // Patient data for this specific upload
@@ -107,6 +112,7 @@ export default function UploadPage() {
     setPreview(null);
     setState("idle");
     setResult(null);
+    setError(null);
   };
 
   // ======================================================
@@ -116,6 +122,7 @@ export default function UploadPage() {
     if (!file) return;
 
     setState("analyzing");
+    setError(null);
     setProgress(10);
 
     const formData = new FormData();
@@ -132,8 +139,18 @@ export default function UploadPage() {
       console.log("🔍 Prediction Response:", data);
 
       if (data.status !== "success") {
-        alert("Prediction error: " + data.message);
-        setState("idle");
+        // Check if it's a validation error (non-ECG image)
+        const errorTitle = data.result?.error === "Not a valid ECG image" 
+          ? "❌ Invalid ECG Image" 
+          : "⚠️ Analysis Error";
+        
+        const errorMessage = data.result?.message || data.message || "Unknown error occurred";
+
+        setError({
+          title: errorTitle,
+          message: errorMessage,
+        });
+        setState("error");
         return;
       }
 
@@ -155,8 +172,11 @@ export default function UploadPage() {
       setState("complete");
     } catch (err) {
       console.error(err);
-      alert("Server Error: Could not analyze ECG");
-      setState("idle");
+      setError({
+        title: "🔴 Server Error",
+        message: "Could not connect to server. Please check your internet connection.",
+      });
+      setState("error");
     }
   };
 
@@ -391,6 +411,25 @@ export default function UploadPage() {
                     <Loader2 className="animate-spin text-primary w-5 h-5 mb-3" />
                     <Progress value={progress} />
                   </div>
+                )}
+
+                {state === "error" && error && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle className="ml-2 font-bold text-base">{error.title}</AlertTitle>
+                    <AlertDescription className="ml-2 mt-2 text-sm">{error.message}</AlertDescription>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-4 w-full"
+                      onClick={() => {
+                        setState("idle");
+                        setError(null);
+                      }}
+                    >
+                      Try Again
+                    </Button>
+                  </Alert>
                 )}
 
                 {state === "idle" && (

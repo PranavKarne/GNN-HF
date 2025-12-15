@@ -323,13 +323,15 @@ def main(image_path):
         is_valid, val_confidence = validate_ecg_image(image_path, validator)
         
         if not is_valid:
-            return {
+            result = {
                 'success': False,
                 'error': 'Not a valid ECG image',
                 'message': f'The uploaded image does not appear to be a valid ECG. Confidence: {val_confidence:.2%}',
                 'validation_confidence': round(val_confidence * 100, 2),
                 'is_valid_ecg': False
             }
+            print(json.dumps(result))  # CRITICAL: Must output to stdout
+            return result
         
         # Step 3: Digitize ECG
         print(f"\n3️⃣  Digitizing ECG signals...", file=sys.stderr)
@@ -382,17 +384,23 @@ def main(image_path):
         print(f"Risk Level: {risk_level}", file=sys.stderr)
         print(f"{'='*60}\n", file=sys.stderr)
         
+        # CRITICAL: Output JSON to stdout (not stderr!)
+        print(json.dumps(result))
         return result
         
     except Exception as e:
         print(f"\n❌ ERROR: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc(file=sys.stderr)
-        return {
+        
+        # CRITICAL: Always output error as JSON to stdout
+        error_result = {
             'success': False,
             'error': str(e),
             'message': f'Prediction failed: {str(e)}'
         }
+        print(json.dumps(error_result))
+        return error_result
 
 
 if __name__ == '__main__':
@@ -405,5 +413,5 @@ if __name__ == '__main__':
         sys.exit(1)
     
     image_path = sys.argv[1]
-    result = main(image_path)
-    print(json.dumps(result))
+    # main() already prints JSON to stdout, so just call it
+    main(image_path)

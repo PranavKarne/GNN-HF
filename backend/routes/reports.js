@@ -183,23 +183,54 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
 
     // Logo (optional - skip if not found)
     try {
-      // Try multiple possible locations
+      // Try multiple possible locations for logo
       const possibleLogoPaths = [
         path.join(process.cwd(), "assets", "logo.png"),
-        path.join(process.cwd(), "frontend", "src", "assets", "hero-heart.png"),
+        path.join(process.cwd(), "..", "frontend", "src", "assets", "hero-heart.png"),
+        path.join(process.cwd(), "..", "frontend", "public", "hero-heart.png"),
+        path.join(process.cwd(), "frontend", "public", "logo.png"),
       ];
       
+      console.log("🔍 Searching for logo in paths:", possibleLogoPaths);
       const logoPath = possibleLogoPaths.find(p => fs.existsSync(p));
+      
       if (logoPath) {
-        doc.image(logoPath, margin, 20, { 
-          fit: [80, 80],
-          align: 'center',
-          valign: 'center'
-        });
+        console.log("✅ Logo found at:", logoPath);
+        try {
+          doc.image(logoPath, margin, 20, { 
+            fit: [80, 80],
+            align: 'center',
+            valign: 'center'
+          });
+          console.log("✅ Logo successfully added to PDF");
+        } catch (imgErr) {
+          console.error("❌ Error embedding logo image:", imgErr.message);
+          console.error("Stack:", imgErr.stack);
+          // Use text logo as fallback
+          doc
+            .fontSize(24)
+            .fillColor("#ffffff")
+            .font("Helvetica-Bold")
+            .text("❤️", margin + 30, 30);
+        }
+      } else {
+        console.warn("⚠️ Logo not found in any of these paths:", possibleLogoPaths);
+        // Use text logo as fallback
+        doc
+          .fontSize(24)
+          .fillColor("#ffffff")
+          .font("Helvetica-Bold")
+          .text("❤️", margin + 30, 30);
       }
-      // Logo not found is OK, just continue without it
     } catch (err) {
-      console.warn("⚠️ Logo not found (continuing without it):", err.message);
+      console.error("⚠️ Logo error (using text fallback):", err.message);
+      console.error("Stack:", err.stack);
+      // Fallback to emoji logo
+      doc
+        .fontSize(24)
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .text("❤️", margin + 30, 30);
     }
 
     // Title
@@ -333,7 +364,12 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
 
     if (report.imageBase64) {
       try {
-        const imageBuffer = Buffer.from(report.imageBase64, "base64");
+        console.log("📸 Processing ECG image for PDF. Base64 length:", report.imageBase64.length);
+        // Strip the data URL prefix to get pure base64
+        const base64Data = report.imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        console.log("✂️ Stripped base64 length:", base64Data.length);
+        const imageBuffer = Buffer.from(base64Data, "base64");
+        console.log("✅ Image buffer created, size:", imageBuffer.length, "bytes");
         const imgY = ecgY + 25;
         
         // White background with shadow effect
@@ -345,11 +381,14 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
           fit: [contentWidth - 20, 180],
           align: "center",
         });
+        console.log("✅ ECG image added to PDF successfully");
       } catch (err) {
-        console.error("⚠️ Error adding image to PDF:", err);
-        doc.fontSize(10).fillColor("#ef4444").font("Helvetica").text("ECG image could not be loaded", margin, ecgY + 25);
+        console.error("❌ Error adding ECG image to PDF:", err.message);
+        console.error("Stack:", err.stack);
+        doc.fontSize(10).fillColor("#ef4444").font("Helvetica").text("ECG image could not be loaded: " + err.message, margin, ecgY + 25);
       }
     } else {
+      console.warn("⚠️ No imageBase64 in report");
       doc.fontSize(10).fillColor("#64748b").font("Helvetica").text("No ECG image available", margin, ecgY + 25);
     }
 
