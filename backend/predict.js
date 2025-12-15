@@ -97,8 +97,12 @@ function runPython(script, args = []) {
   return new Promise((resolve, reject) => {
     logger.debug("Running Python script", { script, args });
 
-    // Use system python3 from PATH
-    const pythonPath = process.env.PYTHON_PATH || "python3";
+    // Detect Python executable: Windows uses 'python', Unix uses 'python3'
+    // Can override with PYTHON_PATH env variable
+    let pythonPath = process.env.PYTHON_PATH;
+    if (!pythonPath) {
+      pythonPath = process.platform === "win32" ? "python" : "python3";
+    }
     
     const py = spawn(pythonPath, [script, ...args], {
       cwd: process.cwd(),
