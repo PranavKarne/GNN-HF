@@ -134,7 +134,7 @@ function runPython(script, args = []) {
 // - imagePath (public URL)
 // - imageBase64 (for MongoDB storage)
 // =============================================================
-router.post("/predict", authMiddleware, upload.single("ecgImage"), async (req, res) => {
+router.post("/", authMiddleware, upload.single("ecgImage"), async (req, res) => {
   const log = req.log || logger;
   
   try {
