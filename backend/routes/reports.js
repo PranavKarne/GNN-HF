@@ -181,18 +181,25 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
       .rect(0, 120, pageWidth, 3)
       .fillAndStroke("#ef4444", "#ef4444");
 
-    // Logo
+    // Logo (optional - skip if not found)
     try {
-      const logoPath = path.join(process.cwd(), "assets", "logo.png");
-      if (fs.existsSync(logoPath)) {
+      // Try multiple possible locations
+      const possibleLogoPaths = [
+        path.join(process.cwd(), "assets", "logo.png"),
+        path.join(process.cwd(), "frontend", "src", "assets", "hero-heart.png"),
+      ];
+      
+      const logoPath = possibleLogoPaths.find(p => fs.existsSync(p));
+      if (logoPath) {
         doc.image(logoPath, margin, 20, { 
           fit: [80, 80],
           align: 'center',
           valign: 'center'
         });
       }
+      // Logo not found is OK, just continue without it
     } catch (err) {
-      console.error("⚠️ Logo not found:", err.message);
+      console.warn("⚠️ Logo not found (continuing without it):", err.message);
     }
 
     // Title

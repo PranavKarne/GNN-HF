@@ -466,7 +466,7 @@ export default function HistoryPage() {
 
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img
-                    src={`http://localhost:5000${selectedRecord.imagePath}`}
+                    src={`${import.meta.env.VITE_API_URL}${selectedRecord.imagePath}`}
                     className="w-full h-48 object-contain bg-muted/50"
                   />
                 </div>
