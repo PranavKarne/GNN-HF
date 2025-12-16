@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BackToHome } from "@/components/BackToHome";
-import { API_ENDPOINTS } from "@/config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "@/config/api";
 import { getAuthHeaders } from "@/config/apiUtils";
 
 import {
@@ -466,7 +466,7 @@ export default function HistoryPage() {
 
                 <div className="rounded-xl overflow-hidden border border-border">
                   <img
-                    src={`${import.meta.env.VITE_API_URL}${selectedRecord.imagePath}`}
+                    src={`${API_BASE_URL}${selectedRecord.imagePath}`}
                     className="w-full h-48 object-contain bg-muted/50"
                   />
                 </div>

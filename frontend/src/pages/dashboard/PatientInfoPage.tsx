@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, User, Heart, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { API_ENDPOINTS } from "@/config/api";
 
 interface PatientForm {
   patientName: string;
@@ -53,7 +54,7 @@ export default function PatientInfoPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/auth/patient-info", {
+      const res = await fetch(API_ENDPOINTS.PATIENT_INFO, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

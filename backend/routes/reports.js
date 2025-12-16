@@ -362,12 +362,46 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
       .font("Helvetica-Bold")
       .text("ECG Analysis", margin, ecgY);
 
-    if (report.imageBase64) {
+    // Try to load image from file system using imagePath
+    if (report.imagePath) {
       try {
-        console.log("📸 Processing ECG image for PDF. Base64 length:", report.imageBase64.length);
-        // Strip the data URL prefix to get pure base64
+        console.log("📸 Loading ECG image from path:", report.imagePath);
+        
+        // Build full path to the image file
+        const fullImagePath = path.join(process.cwd(), report.imagePath);
+        console.log("🔍 Full image path:", fullImagePath);
+        
+        // Check if file exists
+        if (fs.existsSync(fullImagePath)) {
+          console.log("✅ Image file found");
+          
+          const imgY = ecgY + 25;
+          
+          // White background with shadow effect
+          doc
+            .roundedRect(margin, imgY, contentWidth, 200, 8)
+            .fillAndStroke("#ffffff", "#cbd5e1");
+          
+          // Load image directly from file
+          doc.image(fullImagePath, margin + 10, imgY + 10, {
+            fit: [contentWidth - 20, 180],
+            align: "center",
+          });
+          console.log("✅ ECG image added to PDF successfully");
+        } else {
+          console.warn("⚠️ Image file not found at:", fullImagePath);
+          doc.fontSize(10).fillColor("#ef4444").font("Helvetica").text("ECG image file not found on server", margin, ecgY + 25);
+        }
+      } catch (err) {
+        console.error("❌ Error loading ECG image from file:", err.message);
+        console.error("Stack:", err.stack);
+        doc.fontSize(10).fillColor("#ef4444").font("Helvetica").text("ECG image could not be loaded: " + err.message, margin, ecgY + 25);
+      }
+    } else if (report.imageBase64) {
+      // Fallback: try base64 if imagePath is not available (legacy reports)
+      try {
+        console.log("📸 Processing ECG image from base64. Length:", report.imageBase64.length);
         const base64Data = report.imageBase64.replace(/^data:image\/\w+;base64,/, '');
-        console.log("✂️ Stripped base64 length:", base64Data.length);
         const imageBuffer = Buffer.from(base64Data, "base64");
         console.log("✅ Image buffer created, size:", imageBuffer.length, "bytes");
         const imgY = ecgY + 25;
@@ -381,14 +415,14 @@ router.get("/download-report/:id", authMiddleware, validateObjectId('id'), async
           fit: [contentWidth - 20, 180],
           align: "center",
         });
-        console.log("✅ ECG image added to PDF successfully");
+        console.log("✅ ECG image added to PDF successfully from base64");
       } catch (err) {
         console.error("❌ Error adding ECG image to PDF:", err.message);
         console.error("Stack:", err.stack);
         doc.fontSize(10).fillColor("#ef4444").font("Helvetica").text("ECG image could not be loaded: " + err.message, margin, ecgY + 25);
       }
     } else {
-      console.warn("⚠️ No imageBase64 in report");
+      console.warn("⚠️ No image available in report (no imagePath or imageBase64)");
       doc.fontSize(10).fillColor("#64748b").font("Helvetica").text("No ECG image available", margin, ecgY + 25);
     }
 

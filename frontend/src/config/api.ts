@@ -3,13 +3,14 @@
  * Centralized API base URL configuration
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export const API_ENDPOINTS = {
   // Auth
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   SIGNUP: `${API_BASE_URL}/api/auth/signup`,
   PROFILE: `${API_BASE_URL}/api/auth/profile`,
+  PATIENT_INFO: `${API_BASE_URL}/api/auth/patient-info`,
   
   // Predictions
   PREDICT: `${API_BASE_URL}/api/predict`,

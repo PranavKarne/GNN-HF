@@ -2,7 +2,7 @@
 """
 Real ECG Heart Disease Prediction using trained CNN-GNN model
 Architecture matches heartdiseasepredictioncollabfile.ipynb TRAINING cell (Cell 4)
-Class mapping: CD=0, HYP=1, MI=2, NORM=3, STTC=4 (from class_map in notebook)
+Class mapping: CD=0, HYP=1, MI=2, NORM=3, STTC=4 (from class_map in notebook) 
 """
 import sys
 import os
@@ -415,3 +415,5 @@ if __name__ == '__main__':
     image_path = sys.argv[1]
     # main() already prints JSON to stdout, so just call it
     main(image_path)
+
+
