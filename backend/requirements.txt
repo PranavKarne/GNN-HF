@@ -1,11 +1,12 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 
-torch==2.6.0+cpu
-torchvision==0.21.0+cpu
-torch-geometric==2.6.1
-scipy==1.14.1
-numpy==1.26.4
-Pillow==11.0.0
-opencv-python==4.10.0.84
-scikit-image==0.24.0
-matplotlib==3.9.2
+torch
+torchvision
+numpy
+scipy
+pillow
+opencv-python-headless
+scikit-image
+matplotlib
+
+
