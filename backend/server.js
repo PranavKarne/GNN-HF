@@ -33,24 +33,63 @@ const __dirname = path.dirname(__filename);
 // ======================
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
-  .map(o => o.trim())
+  .map(o => o.trim().replace(/\/$/, "")) // Remove trailing slashes
   .filter(Boolean);
 
 if (allowedOrigins.length === 0) {
-  logger.warn("No FRONTEND_URL configured; defaulting to http://localhost:5173");
+  logger.warn("⚠️  No FRONTEND_URL configured; defaulting to http://localhost:5173");
   allowedOrigins.push("http://localhost:5173");
 }
 
+// Validate origins are valid URLs
+const invalidOrigins = allowedOrigins.filter(origin => {
+  try {
+    new URL(origin);
+    return false;
+  } catch {
+    return true;
+  }
+});
+
+if (invalidOrigins.length > 0) {
+  logger.error("❌ Invalid CORS origins detected:", invalidOrigins);
+  logger.error("❌ Server will not start with invalid FRONTEND_URL configuration");
+  process.exit(1);
+}
+
+logger.info("✅ CORS allowed origins:", allowedOrigins);
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) {
+      logger.debug("CORS: Request with no origin (allowed)");
+      return callback(null, true);
+    }
+    
+    // Normalize origin (remove trailing slash)
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    
+    // Check if origin is allowed
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      logger.debug(`✅ CORS allowed: ${origin}`);
+      return callback(null, true);
+    }
 
-    logger.error(`CORS blocked origin: ${origin}`);
-    return callback(new Error("Not allowed by CORS"));
+    // Log blocked origin with detailed info for troubleshooting
+    logger.error(`❌ CORS BLOCKED REQUEST`);
+    logger.error(`   Origin: ${origin}`);
+    logger.error(`   Normalized: ${normalizedOrigin}`);
+    logger.error(`   Allowed origins: ${allowedOrigins.join(", ")}`);
+    logger.error(`   💡 Fix: Add "${normalizedOrigin}" to FRONTEND_URL env var`);
+    
+    // Return false (not Error) to send proper CORS headers
+    return callback(null, false);
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 // ======================
@@ -111,6 +150,29 @@ app.get("/health", (req, res) => {
     timestamp: Date.now(),
     database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     memory: process.memoryUsage(),
+    cors: {
+      configured: true,
+      allowedOrigins: allowedOrigins,
+      originCount: allowedOrigins.length
+    }
+  });
+});
+
+// CORS diagnostic endpoint (helps debug CORS issues)
+app.get("/api/cors-check", (req, res) => {
+  const origin = req.headers.origin || req.headers.referer || "none";
+  const normalizedOrigin = origin.replace(/\/$/, "");
+  const isAllowed = allowedOrigins.includes(normalizedOrigin);
+  
+  res.json({
+    status: "success",
+    requestOrigin: origin,
+    normalizedOrigin: normalizedOrigin,
+    isAllowed: isAllowed,
+    configuredOrigins: allowedOrigins,
+    tip: isAllowed 
+      ? "✅ Your origin is allowed" 
+      : `❌ Add "${normalizedOrigin}" to FRONTEND_URL environment variable`
   });
 });
 
@@ -122,6 +184,22 @@ app.use((req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   const log = req.log || logger;
+  
+  // Special handling for CORS errors
+  if (err.message && err.message.includes("CORS")) {
+    log.error("CORS Error Caught", { 
+      error: err.message, 
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path
+    });
+    return res.status(403).json({
+      success: false,
+      message: "CORS policy violation. Origin not allowed.",
+      hint: `Contact admin to add "${req.headers.origin}" to allowed origins`
+    });
+  }
+  
   log.error("Global error handler", { error: err.message, stack: err.stack });
 
   if (err.code === "LIMIT_FILE_SIZE") {
